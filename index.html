@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房务员认知培训</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --orange: #D2691E;
+            --orange-light: #F4A460;
+            --orange-bg: #FFF8F0;
+            --blue: #5B9BD5;
+            --blue-light: #B4D4E7;
+            --blue-bg: #F0F7FC;
+            --green: #4CAF50;
+            --green-bg: #E8F5E9;
+            --red: #EF5350;
+            --red-bg: #FFEBEE;
+            --gray-dark: #4A4A4A;
+            --gray: #666;
+            --gray-light: #999;
+            --bg: #FAFBFC;
+            --white: #FFFFFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--gray-dark);
+            line-height: 1.8;
+            padding: 15px;
+            font-size: 17px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* 密码页面 */
+        .password-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .password-screen.hidden { display: none; }
+
+        .password-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 360px;
+            width: 90%;
+        }
+        .password-icon { font-size: 3em; margin-bottom: 15px; }
+        .password-box h2 { color: var(--orange); margin-bottom: 8px; font-size: 1.4em; }
+        .password-box p { color: var(--gray); font-size: 0.9em; margin-bottom: 25px; }
+        .password-input, .name-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .name-input { margin-bottom: 10px; }
+        .password-input:focus { outline: none; border-color: var(--orange); }
+        .password-input.error { border-color: #EF5350; animation: shake 0.3s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .password-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .password-btn:hover { background: #C05A15; }
+        .password-error { color: #EF5350; font-size: 0.85em; margin-top: 10px; display: none; }
+        .password-error.show { display: block; }
+
+        /* 主内容 */
+        .main-content { display: none; }
+        .main-content.show { display: block; }
+
+        /* 头部 - 精简版 */
+        .header {
+            text-align: center;
+            padding: 15px 15px 12px;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 150px; height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .header-icon { font-size: 1.6em; margin-bottom: 5px; }
+        .header h1 { font-size: 1.3em; font-weight: 600; position: relative; }
+        .header .subtitle { opacity: 0.9; font-size: 0.85em; margin-top: 3px; position: relative; }
+
+        /* 计分栏 */
+        .score-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .score-info { display: flex; align-items: center; gap: 15px; }
+        .score-label { font-size: 0.85em; color: var(--gray); }
+        .score-value { font-size: 1.4em; font-weight: 600; color: var(--orange); }
+        .score-progress { display: flex; align-items: center; gap: 8px; }
+        .progress-text { font-size: 0.8em; color: var(--gray); }
+        .progress-bar {
+            width: 120px; height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange) 0%, var(--orange-light) 100%);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* 分类标签 */
+        .category-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .category-tab {
+            padding: 15px 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .category-tab:hover { border-color: var(--blue); background: var(--blue-bg); }
+        .category-tab.active { border-color: var(--orange); background: var(--orange-bg); }
+        .category-tab .icon { font-size: 1.5em; margin-bottom: 5px; }
+        .category-tab .label { font-size: 0.8em; font-weight: 500; color: var(--gray-dark); }
+        .category-tab.active .label { color: var(--orange); }
+        .category-tab .tab-score {
+            position: absolute;
+            top: 8px; right: 8px;
+            font-size: 0.7em;
+            color: var(--gray);
+        }
+        .category-tab .tab-score.complete { color: var(--green); }
+
+        @media (max-width: 600px) {
+            .category-tabs { grid-template-columns: repeat(2, 1fr); }
+            .category-tab { padding: 12px 8px; }
+            .category-tab .icon { font-size: 1.3em; }
+            .category-tab .label { font-size: 0.75em; }
+        }
+
+        /* 展开/折叠按钮 */
+        .toggle-all-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .toggle-all-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 0.8em;
+            color: var(--gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        .toggle-all-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+
+        /* 分类内容区 */
+        .category-content { display: none; }
+        .category-content.active { display: block; }
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .category-title .icon { font-size: 1.3em; }
+        .category-title .text { font-size: 1.1em; font-weight: 600; color: var(--gray-dark); }
+
+        /* 模块卡片 */
+        .module {
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .module-header {
+            padding: 15px 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--blue);
+            transition: background 0.2s;
+        }
+        .module-header:hover { background: var(--blue-bg); }
+        .module-header.answered { border-left-color: var(--green); }
+        .module-header.answered-wrong { border-left-color: var(--red); }
+        .module-icon {
+            width: 28px; height: 28px;
+            background: var(--blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .module-header.answered .module-icon { background: var(--green); }
+        .module-header.answered-wrong .module-icon { background: var(--red); }
+        .module-title { flex: 1; font-size: 1em; color: var(--gray-dark); }
+        .module-status { font-size: 1.1em; }
+        .module-arrow { color: var(--gray-light); transition: transform 0.3s; font-size: 0.9em; }
+        .module-arrow.open { transform: rotate(180deg); }
+
+        .module-content { display: none; padding: 0 18px 18px 18px; }
+        .module-content.active { display: block; }
+
+        /* 选择题区域 - 放在最上方 */
+        .quiz-section {
+            background: var(--orange-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .quiz-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .quiz-icon { font-size: 1.2em; }
+        .quiz-title { font-size: 1em; color: var(--gray-dark); font-weight: 500; }
+        .quiz-options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .quiz-option {
+            padding: 14px 14px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            color: var(--gray-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover:not(.selected) { border-color: var(--blue); background: var(--blue-bg); }
+        .quiz-option .letter {
+            background: var(--orange-light);
+            color: white;
+            min-width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .quiz-option .option-text { flex: 1; }
+        .quiz-option .result-icon { font-size: 1.2em; display: none; }
+        .quiz-option.selected { pointer-events: none; }
+        .quiz-option.selected.correct { border-color: var(--green); background: var(--green-bg); }
+        .quiz-option.selected.correct .letter { background: var(--green); }
+        .quiz-option.selected.correct .result-icon { display: block; color: var(--green); }
+        .quiz-option.selected.wrong { border-color: var(--red); background: var(--red-bg); }
+        .quiz-option.selected.wrong .letter { background: var(--red); }
+        .quiz-option.selected.wrong .result-icon { display: block; color: var(--red); }
+        .quiz-option.show-correct { border-color: var(--green); background: var(--green-bg); pointer-events: none; }
+        .quiz-option.show-correct .letter { background: var(--green); }
+
+        .quiz-feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+        .quiz-feedback.show { display: flex; }
+        .quiz-feedback.correct { background: var(--green-bg); border: 1px solid var(--green); }
+        .quiz-feedback.wrong { background: var(--red-bg); border: 1px solid var(--red); }
+        .quiz-feedback .feedback-icon { font-size: 1.3em; }
+        .quiz-feedback.correct .feedback-icon { color: var(--green); }
+        .quiz-feedback.wrong .feedback-icon { color: var(--red); }
+        .quiz-feedback .feedback-text { font-size: 0.85em; color: var(--gray-dark); }
+
+        /* 培训内容区 - 答题后显示 */
+        .training-content { display: none; }
+        .training-content.show { display: block; }
+
+        /* 已答题后淡化题目区，突出培训内容 */
+        .module.answered .quiz-section {
+            background: #f8f8f8;
+            opacity: 0.7;
+            border: 1px dashed #ddd;
+        }
+        .module.answered .training-content {
+            background: linear-gradient(to bottom, #fff 0%, #fafafa 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e8e8e8;
+            margin-top: 10px;
+        }
+
+        /* 提示/话术框 */
+        .tip-box {
+            background: var(--blue-bg);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+        .tip-content { font-size: 0.95em; color: var(--gray); }
+        .highlight { background: #FFF3CD; padding: 2px 5px; border-radius: 3px; font-weight: 500; }
+
+        /* 警示框 */
+        .warning-box {
+            background: #FFF3E0;
+            border: 1px solid #FFB74D;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .warning-box .icon { font-size: 1.2em; color: #F57C00; }
+        .warning-box .text { font-size: 0.85em; color: #E65100; font-style: italic; }
+
+        /* 正确/错误做法 */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 600px) { .action-grid { grid-template-columns: 1fr; } }
+        .action-card { border-radius: 10px; padding: 15px; }
+        .action-card.correct { background: var(--green-bg); border-left: 4px solid var(--green); }
+        .action-card.wrong { background: var(--red-bg); border-left: 4px solid var(--red); }
+        .action-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .action-header i { font-size: 1.1em; }
+        .action-card.correct .action-header { color: #2E7D32; }
+        .action-card.wrong .action-header { color: #C62828; }
+        .action-header span { font-size: 0.8em; font-weight: 600; }
+        .action-card ul { padding-left: 16px; margin: 0; font-size: 0.95em; }
+        .action-card li { margin-bottom: 5px; color: var(--gray); }
+        .action-card li:last-child { margin-bottom: 0; }
+
+        /* 结果弹窗 */
+        .result-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .result-modal.show { display: flex; }
+        .result-box {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .result-header {
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+        .result-score { font-size: 3em; font-weight: 600; }
+        .result-total { font-size: 1.2em; opacity: 0.9; }
+        .result-message { margin-top: 10px; font-size: 0.9em; opacity: 0.8; }
+        .result-body {
+            padding: 15px;
+            max-height: 35vh;
+            overflow-y: auto;
+        }
+        .result-list { list-style: none; }
+        .result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85em;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .result-item .num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: white;
+        }
+        .result-item .num.correct { background: var(--green); }
+        .result-item .num.wrong { background: var(--red); }
+        .result-item .title { flex: 1; color: var(--gray-dark); }
+        .result-item .status { font-size: 1.1em; }
+        .result-footer {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .result-tip {
+            background: #FFF3CD;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #856404;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .result-btn {
+            padding: 14px 40px;
+            background: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+        }
+        .result-btn:hover { background: #C05A15; }
+
+        /* 底部信用文字（隐藏重置功能） */
+        .footer-credit {
+            display: block;
+            text-align: center;
+            margin: 30px auto 10px;
+            padding: 8px 20px;
+            font-size: 0.75em;
+            color: var(--gray-light);
+            cursor: default;
+            user-select: none;
+        }
+
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        .back-to-top:hover { background: #C05A15; transform: scale(1.1); }
+        .back-to-top.show { display: flex; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; font-size: 16px; }
+            .header { padding: 12px 12px 10px; }
+            .header h1 { font-size: 1.2em; }
+            .header-icon { font-size: 1.4em; }
+            .score-bar { flex-direction: column; gap: 8px; text-align: center; padding: 12px; }
+            .module-header { padding: 12px 12px; }
+            .module-title { font-size: 0.95em; }
+            .password-box { padding: 25px 20px; }
+            .toggle-all-btns { justify-content: center; }
+            .result-score { font-size: 2.2em; }
+            .result-box { max-height: 90vh; }
+            .result-body { max-height: 30vh; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码页面 -->
+    <div class="password-screen" id="passwordScreen">
+        <div class="password-box">
+            <div class="password-icon">🔐</div>
+            <h2>培训系统</h2>
+            <p>请输入姓名和密码进入培训</p>
+            <input type="text" class="name-input" id="nameInput" placeholder="请输入您的姓名">
+            <input type="password" class="password-input" id="passwordInput" placeholder="请输入密码" onkeypress="handleKeyPress(event)">
+            <button class="password-btn" onclick="checkPassword()">进入培训</button>
+            <div class="password-error" id="passwordError">密码错误，请重试</div>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <div class="main-content" id="mainContent">
+        <div class="container">
+            <div class="header">
+                <div class="header-icon">🏨</div>
+                <h1>房务员认知培训</h1>
+                <p class="subtitle">20个情境 · 4大分类 · 掌握专业技巧</p>
+            </div>
+
+            <!-- 计分栏 -->
+            <div class="score-bar">
+                <div class="score-info">
+                    <span class="score-label">当前得分</span>
+                    <span class="score-value" id="currentScore">0</span>
+                    <span class="score-label">/ 20</span>
+                </div>
+                <div class="score-progress">
+                    <span class="progress-text">进度 <span id="answeredCount">0</span>/20</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分类标签 -->
+            <div class="category-tabs">
+                <div class="category-tab active" onclick="switchCategory('safety')">
+                    <div class="icon">🔒</div>
+                    <div class="label">服务安全规范</div>
+                    <span class="tab-score" id="tab-safety-score"></span>
+                </div>
+                <div class="category-tab" onclick="switchCategory('boundary')">
+                    <div class="icon">🤝</div>
+                    <div class="label">职业边界</div>
+                    <span class="tab-score" id="tab-boundary-score"></span>
+                </div>
+                <div class="category-tab" onclick="switchCategory('integrity')">
+                    <div class="icon">⚖️</div>
+                    <div class="label">诚信操守</div>
+                    <span class="tab-score" id="tab-integrity-score"></span>
+                </div>
+                <div class="category-tab" onclick="switchCategory('discipline')">
+                    <div class="icon">📋</div>
+                    <div class="label">工作纪律</div>
+                    <span class="tab-score" id="tab-discipline-score"></span>
+                </div>
+            </div>
+
+            <!-- 展开/折叠按钮 -->
+            <div class="toggle-all-btns">
+                <button class="toggle-all-btn" onclick="expandAll()">
+                    <i class="fas fa-expand-alt"></i> 全部展开
+                </button>
+                <button class="toggle-all-btn" onclick="collapseAll()">
+                    <i class="fas fa-compress-alt"></i> 全部折叠
+                </button>
+            </div>
+
+            <!-- ========== 服务安全规范 ========== -->
+            <div class="category-content active" id="cat-safety">
+                <div class="category-title">
+                    <span class="icon">🔒</span>
+                    <span class="text">服务安全规范</span>
+                </div>
+
+                <!-- 1. 物品寄存 -->
+                <div class="module" data-question="1" data-category="safety">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">1</div>
+                        <div class="module-title">客人说有东西寄存，要我们代为保管，后天回来拿，是否可以？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <!-- 先测验 -->
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">请选择正确的处理方式：</div>
+                            </div>
+                            <div class="quiz-options" data-correct="B" data-question="1">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">先帮忙保管，事后跟主管报备一下</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">礼貌回应：为了所有住客的安全，请客人到前台核实身份</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">只要客人留下联系方式就可以帮忙保管</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">帮客人放在走廊角落，告诉他位置</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <!-- 后培训 -->
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    <strong>正确应对：</strong>礼貌回应「<span class="highlight">为了所有住客的安全，请您到前台核实身份</span>」，说明前台会提供寄存凭证，确保物品安全。<br><br>
+                                    房务员不具备物品保管授权。正规寄存有登记、有凭证，可避免丢失纠纷。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌引导客人到前台</li>
+                                        <li>说明正规寄存有凭证保障</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>私自接收物品代为保管</li>
+                                        <li>存放在工作间或储物柜</li>
+                                        <li>未登记就接收物品</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 陌生人进房 -->
+                <div class="module" data-question="2" data-category="safety">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">2</div>
+                        <div class="module-title">正在打扫续住房时，有另外的客人走进来房间要东西，如何处理？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">有人说是住客朋友来取电脑，能报出住客姓名，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="2">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">能说出住客姓名，应该可信，让他快速拿走</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">让他打电话给住客，听到同意就让他进</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">关上房门，并请到前台核实身份并取得房卡</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">帮他找到电脑，自己递给他就不算让他进房</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「不好意思，为了保护住客财产安全，麻烦您先到<span class="highlight">前台核实身份并取得房卡</span>，谢谢配合。」<br><br>
+                                    无论对方说什么，都必须通过前台验证身份。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>立即停止工作，关上房门</li>
+                                        <li>请对方到前台核实身份</li>
+                                        <li>保持礼貌但坚定</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>不询问直接让对方进入</li>
+                                        <li>因态度强硬就妥协</li>
+                                        <li>离开让对方自行取物</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 敲门流程 -->
+                <div class="module" data-question="3" data-category="safety">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">3</div>
+                        <div class="module-title">敲门后没人应，不查房间是否有客人，直接打扫或扫码？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">敲门三次无人应答后，你刷卡开门，接下来正确的做法是？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="3">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">既然敲了三次没人，可以直接开始打扫</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">喊一声「有人吗」就开始工作</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">先进浴室检查，再开始打扫</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">开门后环视整个房间确认无人，方可开始打扫</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    <strong>标准进房流程：</strong><br>
+                                    • 第一次：敲门3下，报身份，<span class="highlight">等待10秒</span><br>
+                                    • 第二次：再敲3下，报身份，<span class="highlight">等待10秒</span><br>
+                                    • 第三次：再敲3下，报身份，<span class="highlight">等待10秒</span><br>
+                                    • 进入确认：开门后<span class="highlight">环视整个房间确认无人</span>，方可开始打扫
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>三次敲门各等10秒</li>
+                                        <li>开门后环视确认无人</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>没人应门直接扫码打扫</li>
+                                        <li>无视DND灯直接敲门</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. DND房打电话 -->
+                <div class="module" data-question="4" data-category="safety">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">4</div>
+                        <div class="module-title">DND房，是否可以自行打电话进去询问是否需要打扫？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">DND房已经一整天了，你想确认客人是否需要服务，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="B" data-question="4">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">打电话进去问一下，电话比敲门更礼貌</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">在手机系统上选择该房间DND功能，以作登记</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">轻轻敲门试探，如果客人在就会回应</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">既然客人挂DND，直接跳过不用管</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">🤔</div>
+                                <div class="text">「打电话不算打扰吧？」——错！「请勿打扰」= <strong>不希望被任何形式干扰</strong>，包括敲门、打电话。</div>
+                            </div>
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    <strong>正确做法：</strong><span class="highlight">在手机系统上选择该房间DND功能</span>，以作登记，按酒店规定的DND处理流程执行。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>绝不自行打电话进房</li>
+                                        <li>在系统登记DND状态</li>
+                                        <li>按DND流程执行</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>自作主张打电话询问</li>
+                                        <li>认为电话不算打扰</li>
+                                        <li>多次尝试联系客人</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 客人说等一下 -->
+                <div class="module" data-question="5" data-category="safety">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">5</div>
+                        <div class="module-title">客人说「等一下再打扫」，你应该？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">你敲门后客人说「我现在不方便，等一下再来」，正确做法是？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="5">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">告诉客人必须现在打扫，不然来不及</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">直接跳过这间房，不再回来</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">礼貌回应，记录并安排稍后再来打扫</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">在门口等客人方便再进去</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「好的，没问题，请问大约什么时候方便？我稍后再来为您服务。」
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌回应，尊重客人意愿</li>
+                                        <li>记录房号和回访时间</li>
+                                        <li>按时回来完成打扫</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>强迫客人现在接受服务</li>
+                                        <li>跳过不管、忘记回来</li>
+                                        <li>在门口干等浪费时间</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 职业边界 ========== -->
+            <div class="category-content" id="cat-boundary">
+                <div class="category-title">
+                    <span class="icon">🤝</span>
+                    <span class="text">职业边界</span>
+                </div>
+
+                <!-- 6. 拒绝拥抱 -->
+                <div class="module" data-question="6" data-category="boundary">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">6</div>
+                        <div class="module-title">客人要求拥抱，是否可以？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">客人说「就一个拥抱表示感谢，不然我要投诉你服务态度差」，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="6">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">为了避免投诉，勉强答应一下</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">假装没听到继续工作，希望客人放弃</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">礼貌拒绝，如客人坚持则立即离开并报告主管</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">告诉客人下次再说，先把他打发走</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🛡️</div>
+                                <div class="tip-content">
+                                    <strong>合理要求：</strong>多要毛巾、咨询信息、维修请求<br>
+                                    <strong>不合理要求：</strong>拥抱、索要私人电话、邀请外出<br><br>
+                                    酒店完全支持员工拒绝不合理要求，<span class="highlight">保护自己是第一位的！</span>
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>明确拒绝身体接触要求</li>
+                                        <li>保持礼貌但坚定</li>
+                                        <li>如坚持则立即离开报告主管</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>为「服务态度」迁就</li>
+                                        <li>害怕投诉不敢拒绝</li>
+                                        <li>独自应对不求助</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. 客人问工资 -->
+                <div class="module" data-question="7" data-category="boundary">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">7</div>
+                        <div class="module-title">打扫房间时客人在房，客人问「你一个月工资多少？」是否可以回答？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">客人好奇问你「一个月赚多少钱？」，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="7">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">如实告诉客人，这样显得真诚</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">随便说一个数字打发客人</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">礼貌婉拒，公司有明文规定不能透露</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">反问客人的工资，让他知难而退</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「不好意思，公司有规定不方便透露，请问还有什么可以帮到您的吗？」
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌婉拒，引用公司规定</li>
+                                        <li>转移话题，继续专注工作</li>
+                                        <li>保持友善但有分寸</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>透露真实工资</li>
+                                        <li>编造数字敷衍</li>
+                                        <li>态度生硬或不礼貌</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. 加微信 -->
+                <div class="module" data-question="8" data-category="boundary">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">8</div>
+                        <div class="module-title">客人要求加微信，是否可以加？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">客人说「加个微信方便下次订房找你帮忙」，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="8">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">客人是为了方便订房，可以加</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">给一个不常用的微信号，这样不算违规</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">先加上再说，反正可以不回复</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">感谢好意但礼貌婉拒，建议通过酒店官方渠道订房</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「感谢您的认可，但按酒店规定不能添加客人私人联系方式，如有需要可联系前台或关注酒店官方公众号。」
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌婉拒，不提供私人联系方式</li>
+                                        <li>引导客人使用官方渠道</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>添加客人微信或社交账号</li>
+                                        <li>给私人电话号码</li>
+                                        <li>与客人私下联系</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. 客人递烟 -->
+                <div class="module" data-question="9" data-category="boundary">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">9</div>
+                        <div class="module-title">客人在房抽烟，并递给你一支，是否接受？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">客人说「就一支烟，不收白不收，又没人看到」，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="B" data-question="9">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">客人说得对，反正没人看到</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">礼貌拒绝，说工作期间不能接受任何物品</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">收下放口袋，下班后再处理</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">接过来放一边，等客人走了再扔掉</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「谢谢您的好意，但工作期间不能接受。」保持专业态度，继续工作。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌拒绝任何馈赠</li>
+                                        <li>保持专业态度</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>客人要求就不拒绝</li>
+                                        <li>接过来放口袋</li>
+                                        <li>和客人一起抽烟聊天</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 诚信操守 ========== -->
+            <div class="category-content" id="cat-integrity">
+                <div class="category-title">
+                    <span class="icon">⚖️</span>
+                    <span class="text">诚信操守</span>
+                </div>
+
+                <!-- 10. 遗留物品 -->
+                <div class="module" data-question="10" data-category="integrity">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">10</div>
+                        <div class="module-title">客人放在房间的物品（如拖鞋），是否可以「以为」客人不要，占为己有？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">退房后发现床边有一双看起来很旧的拖鞋（不在垃圾桶），正确做法是？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="10">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">这么旧肯定是不要的，直接扔垃圾桶</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">放在走廊，有人要就拿走</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">作为遗留物登记上交，由酒店统一处理</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">看没什么价值，拿回家也没关系</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">⚠️</div>
+                                <div class="text">私拿客人物品属于<strong>盗窃行为</strong>，可能面临法律处罚。拾金不昧会得到表彰和奖励！</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>绝不私自拿取任何物品</li>
+                                        <li>非垃圾桶内=遗留物</li>
+                                        <li>登记并上交主管/前台</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>自行判断「客人不要了」</li>
+                                        <li>私自拿走任何物品</li>
+                                        <li>不登记直接丢弃</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 11. 收钱给洗护用品 -->
+                <div class="module" data-question="11" data-category="integrity">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">11</div>
+                        <div class="module-title">客人给50/100块，要求多拿几套洗护用品或擦药油，是否可以？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">客人给你100块要10套洗发水，说「反正没人知道，你就当赚外快」，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="11">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">反正也没人知道，这是客人自愿给的</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">不收钱但多给几套，算是做个人情</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">少拿点钱少给几套，这样风险小</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">礼貌拒绝，说明每间房会补充每日所需用品，额外需求请联系前台</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">🤫</div>
+                                <div class="text">「反正也没人知道…」——错！监控和盘点都会发现，这是<strong>侵占酒店财物</strong>！</div>
+                            </div>
+                            <div class="tip-box">
+                                <div class="tip-icon">🗣️</div>
+                                <div class="tip-content">
+                                    <strong>话术：</strong>「<span class="highlight">每间房打扫时会补充每日所需的用品</span>，如需额外物品请联系前台。」
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>礼貌拒绝，不收任何费用</li>
+                                        <li>按标准配备数量提供</li>
+                                        <li>引导联系前台</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>收钱后私自多给物品</li>
+                                        <li>认为没人知道</li>
+                                        <li>将酒店物资私自处置</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12. 带物品回家 -->
+                <div class="module" data-question="12" data-category="integrity">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">12</div>
+                        <div class="module-title">是否可以将酒店的客用物品带回家使用？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">酒店的洗发水、拖鞋等客用品剩余很多，带一些回家用应该没关系吧？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="B" data-question="12">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">反正很多用不完，带一点没人会发现</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">这些是给客人的，不是给员工的，绝对不能带走</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">只要不被抓到就可以</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">问过同事说可以就没问题</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">⚠️</div>
+                                <div class="text">酒店所有物品都属于酒店财产，私自带走属于<strong>盗窃行为</strong>，不论价值大小都可能面临处分甚至法律责任！</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>绝不带走任何酒店物品</li>
+                                        <li>物品用于客人，不是员工福利</li>
+                                        <li>如需用品可正规申请</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>认为「小东西」无所谓</li>
+                                        <li>觉得「没人发现」就可以</li>
+                                        <li>听信同事说可以</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 工作纪律 ========== -->
+            <div class="category-content" id="cat-discipline">
+                <div class="category-title">
+                    <span class="icon">📋</span>
+                    <span class="text">工作纪律</span>
+                </div>
+
+                <!-- 13. 在客房抽烟 -->
+                <div class="module" data-question="13" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">13</div>
+                        <div class="module-title">可以在客房内抽烟吗？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">打扫到一间有浓重烟味的退房房间，你烟瘾犯了，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="13">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">反正本来就有烟味，抽一根也分不出来</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">躲在浴室抽，开排风扇就没事</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">忍住，等休息时间去指定吸烟区</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">开窗通风快速抽完，应该没人发现</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">💭</div>
+                                <div class="text">「反正这间房有烟味，关起门来抽一根…」——<strong>绝对不行！</strong>消防隐患、影响客人体验、损害酒店形象。</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>绝对禁止在客房抽烟</li>
+                                        <li>如需吸烟去指定区域</li>
+                                        <li>发现烟味如实记录报告</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>趁有烟味偷抽</li>
+                                        <li>关门以为没人发现</li>
+                                        <li>在任何客房区域抽烟</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 14. 在客房上厕所 -->
+                <div class="module" data-question="14" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">14</div>
+                        <div class="module-title">太急了，可以在客房上厕所吗？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">打扫时突然肚子很痛，客房厕所就在眼前而且刚洗好，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="14">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">这是我自己洗的厕所，用完再洗一次就行</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">反正没人看到，快速解决客人不会知道</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">这间是退房，用一下应该没关系</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">忍耐并尽快去员工洗手间，紧急时向同事交接</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">💭</div>
+                                <div class="text">「反正没人看到，这厕所还是我自己洗的…」——<strong>绝对不允许！</strong>客房是客人付费空间。</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>必须使用员工洗手间</li>
+                                        <li>提前规划预留如厕时间</li>
+                                        <li>紧急时向同事交接</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>使用客房洗手间</li>
+                                        <li>认为没人看到就可以</li>
+                                        <li>用完再重新打扫</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 15. 下班前吃晚餐 -->
+                <div class="module" data-question="15" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">15</div>
+                        <div class="module-title">快下班了房间做完了，为了节省时间，快快在下班吃完晚餐</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">快下班了房间做完了，为了节省时间，快快在下班前吃完晚餐，你应该？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="15">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">反正做完房了，吃完换衣服打卡刚好够钟</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">偷偷去吃，不让主管发现就没事</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">我没有违反规定，我只吃了两餐</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">工作时间应在岗，在规定用两餐的公司规定下，下班再用餐</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">💭</div>
+                                <div class="text">「房间做完了，下班前先吃饭节省时间…」——这是<strong>违规行为</strong>！公司规定两餐用餐时间，工作时间应全程在岗。</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>遵守公司两餐规定</li>
+                                        <li>工作时间内坚守岗位</li>
+                                        <li>下班后再用餐</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>工作时间内偷跑去吃饭</li>
+                                        <li>利用打卡时间差钻空子</li>
+                                        <li>认为做完房就可以提前离岗</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 16. 续住房留最后 -->
+                <div class="module" data-question="16" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">16</div>
+                        <div class="module-title">是否可以留续住房到最后才做？（想等客人回来，只给物品倒垃圾）</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">你想把续住房留到最后做，等客人回来后只补物品倒垃圾，这样做对吗？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="16">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">这样更有效率，客人也不会介意</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">只要最后有做完就没问题</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">在没有DND的情况下，过了上午11点就可以按标准作业流程敲门打扫</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">可以，反正客人不在意房间有没有彻底打扫</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    续住房在没有挂DND的情况下，过了上午11点就应按标准流程敲门进行打扫，<span class="highlight">不能因为想省事而故意拖延或偷工减料</span>。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>过了11点按标准流程敲门打扫</li>
+                                        <li>确认没有DND再进行服务</li>
+                                        <li>每间房都按标准完整清洁</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>故意拖延等客人回来</li>
+                                        <li>只补物品不打扫</li>
+                                        <li>投机取巧省时间</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 17. 房务员清洁标准 -->
+                <div class="module" data-question="17" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">17</div>
+                        <div class="module-title">房务员清洁房间的标准是什么？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">房务员清洁房间的标准是什么？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="C" data-question="17">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">同事间暗地竞争比赛，看谁最快完成收车</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">用可接受的标准去完成房间的清洁工作，反正每天有新客入住</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">干净，整齐</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">只要通过主管所要求的即可</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    房务员清洁房间的标准是<span class="highlight">干净，整齐</span>。不是比速度、不是「差不多就好」、也不是只满足主管要求——而是每间房都达到专业标准。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>每间房都按「干净、整齐」标准清洁</li>
+                                        <li>质量优先，不盲目追求速度</li>
+                                        <li>对每位客人一视同仁</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>与同事比速度而忽略质量</li>
+                                        <li>「可接受」心态敷衍了事</li>
+                                        <li>只满足主管最低要求</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 18. 以下哪条是正确 -->
+                <div class="module" data-question="18" data-category="integrity">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">18</div>
+                        <div class="module-title">以下哪条是正确？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">以下哪条是正确？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="18">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">不同主管的侧重点不同，适应并达到当日主管要求；要求不严重的主管，可以适当"放飞机"</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">客人要求两支水，也当是一间房，并回复主管：已打扫有客，客人在房要睡觉</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">客人称不需要打扫，并找写字楼文员说：已打扫，客人在房，扫不了码。帮忙转房态</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">以上都不正确</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">⚠️</div>
+                                <div class="text">以上选项都是<strong>不诚信行为</strong>！虚报工作状态、欺骗主管、找借口不打扫都是严重违规。</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>如实汇报工作状态</li>
+                                        <li>按标准完成每间房清洁</li>
+                                        <li>不因主管不同而调整标准</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>看主管松紧程度「放飞机」</li>
+                                        <li>虚报已打扫、客人在房等</li>
+                                        <li>找借口逃避正常打扫</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19. 以下哪条不正确 -->
+                <div class="module" data-question="19" data-category="discipline">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">19</div>
+                        <div class="module-title">以下哪条不正确？</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">以下哪条不正确？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="19">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">房间设备有问题：待主管、下个房务员或客人提出处理即可，不需浪费时间</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">房间设备有问题：向主管提出，打电话给工程部师父尽快解决</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">今天刚打扫完的房间，主管也放房了。但转房了，要计多一个点数</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">以上都不正确</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="warning-box">
+                                <div class="icon">⚠️</div>
+                                <div class="text">发现设备问题不报告是<strong>严重失职</strong>！不能等别人发现，应主动报告并跟进处理。</div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>发现设备问题立即报告主管</li>
+                                        <li>联系工程部尽快解决</li>
+                                        <li>跟进维修进度直到解决</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>等主管或客人发现再说</li>
+                                        <li>认为不需浪费时间报告</li>
+                                        <li>推卸给下个房务员处理</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20. 遗漏补充客用品 -->
+                <div class="module" data-question="20" data-category="integrity">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <div class="module-icon">20</div>
+                        <div class="module-title">房务员自身遗漏补充房间的客用品（如一个牙刷）</div>
+                        <span class="module-status"></span>
+                        <i class="fas fa-chevron-down module-arrow"></i>
+                    </div>
+                    <div class="module-content">
+                        <div class="quiz-section">
+                            <div class="quiz-header">
+                                <div class="quiz-icon">❓</div>
+                                <div class="quiz-title">房务员自身遗漏补充房间的客用品（如一个牙刷），如何处理？</div>
+                            </div>
+                            <div class="quiz-options" data-correct="D" data-question="20">
+                                <div class="quiz-option" data-answer="A" onclick="selectAnswer(this)">
+                                    <span class="letter">A</span>
+                                    <span class="option-text">才一个牙刷，要求主管自己补充即可，我不是故意漏的，不要浪费彼此时间</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="B" onclick="selectAnswer(this)">
+                                    <span class="letter">B</span>
+                                    <span class="option-text">在见到主管帮自己补充时，心生感谢，一切尽在不言中</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="C" onclick="selectAnswer(this)">
+                                    <span class="letter">C</span>
+                                    <span class="option-text">只是一个牙刷（或其他），主管的举手之劳，不然需要主管做什么？</span>
+                                    <i class="fas fa-times result-icon"></i>
+                                </div>
+                                <div class="quiz-option" data-answer="D" onclick="selectAnswer(this)">
+                                    <span class="letter">D</span>
+                                    <span class="option-text">了解主管、房务员及其他职位有不同的角色责任；如主管帮忙补充应主动询问遗漏什么，以避免下次再漏</span>
+                                    <i class="fas fa-check result-icon"></i>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback">
+                                <div class="feedback-icon"></div>
+                                <div class="feedback-text"></div>
+                            </div>
+                        </div>
+                        <div class="training-content">
+                            <div class="tip-box">
+                                <div class="tip-icon">💡</div>
+                                <div class="tip-content">
+                                    了解不同职位有不同的角色责任。发现遗漏时，应<span class="highlight">主动询问遗漏了什么</span>，了解问题所在，避免下次再犯。这体现了专业态度和责任心。
+                                </div>
+                            </div>
+                            <div class="action-grid">
+                                <div class="action-card correct">
+                                    <div class="action-header"><i class="fas fa-check-circle"></i><span>正确做法</span></div>
+                                    <ul>
+                                        <li>了解各职位角色责任</li>
+                                        <li>主管帮补时主动询问遗漏了什么</li>
+                                        <li>避免下次再犯同样错误</li>
+                                    </ul>
+                                </div>
+                                <div class="action-card wrong">
+                                    <div class="action-header"><i class="fas fa-times-circle"></i><span>错误做法</span></div>
+                                    <ul>
+                                        <li>认为只是小事不重要</li>
+                                        <li>觉得主管帮补是应该的</li>
+                                        <li>不主动了解自己遗漏什么</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部信用文字（点击5次触发重置） -->
+            <div class="footer-credit" id="footerCredit">2026年1月6号由Benny Liang 整理供内部培训之用<br>更多题目，持续开发中...</div>
+
+        </div>
+    </div>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- 结果弹窗 -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-box">
+            <div class="result-header">
+                <div class="result-name" id="resultName" style="font-size: 1.1em; margin-bottom: 5px;"></div>
+                <div class="result-score" id="finalScore">0</div>
+                <div class="result-total">/ 20 分</div>
+                <div class="result-message" id="resultMessage"></div>
+            </div>
+            <div class="result-body">
+                <ul class="result-list" id="resultList"></ul>
+            </div>
+            <div class="result-footer">
+                <div class="result-tip">
+                    <i class="fas fa-camera"></i>
+                    请截图保存成绩作为培训记录
+                </div>
+                <button class="result-btn" onclick="closeResult()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = '1234';
+        let userName = '';
+        let resetClickCount = 0;
+        let resetClickTimer = null;
+
+        // 题目信息
+        const questions = {
+            1: { title: '物品寄存', category: 'safety' },
+            2: { title: '陌生人进房', category: 'safety' },
+            3: { title: '敲门流程', category: 'safety' },
+            4: { title: 'DND房处理', category: 'safety' },
+            5: { title: '客人说等一下', category: 'safety' },
+            6: { title: '拒绝拥抱', category: 'boundary' },
+            7: { title: '客人问工资', category: 'boundary' },
+            8: { title: '加微信', category: 'boundary' },
+            9: { title: '客人递烟', category: 'boundary' },
+            10: { title: '遗留物品', category: 'integrity' },
+            11: { title: '收钱给物品', category: 'integrity' },
+            12: { title: '带物品回家', category: 'integrity' },
+            13: { title: '客房抽烟', category: 'discipline' },
+            14: { title: '客房上厕所', category: 'discipline' },
+            15: { title: '下班前吃饭', category: 'discipline' },
+            16: { title: '续住房留最后', category: 'discipline' },
+            17: { title: '清洁标准', category: 'discipline' },
+            18: { title: '诚信操守测试', category: 'integrity' },
+            19: { title: '设备问题报告', category: 'discipline' },
+            20: { title: '遗漏客用品', category: 'integrity' }
+        };
+
+        // 答题记录
+        let answers = {};
+        let score = 0;
+
+        function checkPassword() {
+            const nameInput = document.getElementById('nameInput');
+            const pwdInput = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+
+            // 检查姓名
+            if (!nameInput.value.trim()) {
+                nameInput.style.borderColor = '#EF5350';
+                nameInput.focus();
+                return;
+            }
+            nameInput.style.borderColor = '#e0e0e0';
+
+            if (pwdInput.value === CORRECT_PASSWORD) {
+                userName = nameInput.value.trim();
+                document.getElementById('passwordScreen').classList.add('hidden');
+                document.getElementById('mainContent').classList.add('show');
+            } else {
+                pwdInput.classList.add('error');
+                error.classList.add('show');
+                setTimeout(() => pwdInput.classList.remove('error'), 300);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') checkPassword();
+        }
+
+        function switchCategory(cat) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.category-content').forEach(content => content.classList.remove('active'));
+            document.getElementById('cat-' + cat).classList.add('active');
+        }
+
+        function toggleModule(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.module-arrow');
+            content.classList.toggle('active');
+            arrow.classList.toggle('open');
+        }
+
+        function expandAll() {
+            const activeCategory = document.querySelector('.category-content.active');
+            if (activeCategory) {
+                activeCategory.querySelectorAll('.module-content').forEach(content => content.classList.add('active'));
+                activeCategory.querySelectorAll('.module-arrow').forEach(arrow => arrow.classList.add('open'));
+            }
+        }
+
+        function collapseAll() {
+            const activeCategory = document.querySelector('.category-content.active');
+            if (activeCategory) {
+                activeCategory.querySelectorAll('.module-content').forEach(content => content.classList.remove('active'));
+                activeCategory.querySelectorAll('.module-arrow').forEach(arrow => arrow.classList.remove('open'));
+            }
+        }
+
+        function selectAnswer(option) {
+            const quizOptions = option.closest('.quiz-options');
+            const correctAnswer = quizOptions.dataset.correct;
+            const selectedAnswer = option.dataset.answer;
+            const questionNum = parseInt(quizOptions.dataset.question);
+            const feedback = quizOptions.nextElementSibling;
+            const moduleEl = option.closest('.module');
+            const trainingContent = moduleEl.querySelector('.training-content');
+            const moduleHeader = moduleEl.querySelector('.module-header');
+
+            // 已答过的题不再处理
+            if (answers[questionNum] !== undefined) return;
+
+            // 禁用所有选项
+            quizOptions.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.add('selected');
+                if (opt.dataset.answer === correctAnswer) {
+                    opt.classList.add('show-correct');
+                }
+            });
+
+            // 记录答案
+            const isCorrect = selectedAnswer === correctAnswer;
+            answers[questionNum] = isCorrect;
+
+            if (isCorrect) {
+                option.classList.add('correct');
+                feedback.classList.add('correct');
+                feedback.querySelector('.feedback-icon').innerHTML = '✅';
+                feedback.querySelector('.feedback-text').textContent = '回答正确！+1分';
+                score++;
+                moduleHeader.classList.add('answered');
+                moduleEl.classList.add('answered');
+                moduleEl.querySelector('.module-status').textContent = '✅';
+            } else {
+                option.classList.add('wrong');
+                feedback.classList.add('wrong');
+                feedback.querySelector('.feedback-icon').innerHTML = '❌';
+                feedback.querySelector('.feedback-text').textContent = '回答错误，请查看下方正确做法';
+                moduleHeader.classList.add('answered-wrong');
+                moduleEl.classList.add('answered');
+                moduleEl.querySelector('.module-status').textContent = '❌';
+            }
+
+            feedback.classList.add('show');
+            trainingContent.classList.add('show');
+
+            // 更新分数显示
+            updateScoreDisplay();
+
+            // 检查是否全部完成
+            if (Object.keys(answers).length === 20) {
+                setTimeout(showResult, 500);
+            }
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('answeredCount').textContent = Object.keys(answers).length;
+            document.getElementById('progressFill').style.width = (Object.keys(answers).length / 20 * 100) + '%';
+
+            // 更新分类得分
+            const categoryScores = { safety: 0, boundary: 0, integrity: 0, discipline: 0 };
+            const categoryCounts = { safety: 0, boundary: 0, integrity: 0, discipline: 0 };
+
+            for (let q in answers) {
+                const cat = questions[q].category;
+                categoryCounts[cat]++;
+                if (answers[q]) categoryScores[cat]++;
+            }
+
+            for (let cat in categoryScores) {
+                const tabScore = document.getElementById('tab-' + cat + '-score');
+                if (categoryCounts[cat] > 0) {
+                    tabScore.textContent = categoryScores[cat] + '/' + categoryCounts[cat];
+                    if (categoryScores[cat] === categoryCounts[cat]) {
+                        tabScore.classList.add('complete');
+                    }
+                }
+            }
+        }
+
+        function showResult() {
+            const modal = document.getElementById('resultModal');
+            document.getElementById('resultName').textContent = userName ? '👤 ' + userName : '';
+            document.getElementById('finalScore').textContent = score;
+
+            // 评语
+            let message = '';
+            if (score === 20) message = '🎉 满分！你已完全掌握培训内容';
+            else if (score >= 18) message = '👍 表现优秀！继续保持';
+            else if (score >= 14) message = '😊 良好！还有提升空间';
+            else if (score >= 10) message = '📚 及格，建议复习错题';
+            else message = '⚠️ 需要加强学习，请复习培训内容';
+            document.getElementById('resultMessage').textContent = message;
+
+            // 生成题目列表
+            const list = document.getElementById('resultList');
+            list.innerHTML = '';
+            for (let i = 1; i <= 20; i++) {
+                const isCorrect = answers[i];
+                const li = document.createElement('li');
+                li.className = 'result-item';
+                li.innerHTML = `
+                    <span class="num ${isCorrect ? 'correct' : 'wrong'}">${i}</span>
+                    <span class="title">${questions[i].title}</span>
+                    <span class="status">${isCorrect ? '✅' : '❌'}</span>
+                `;
+                list.appendChild(li);
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeResult() {
+            document.getElementById('resultModal').classList.remove('show');
+        }
+
+        function resetQuiz() {
+            if (!confirm('确定要重新开始吗？所有答题记录将被清除。')) return;
+
+            answers = {};
+            score = 0;
+
+            // 重置所有题目状态
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'wrong', 'show-correct');
+            });
+            document.querySelectorAll('.quiz-feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'wrong');
+            });
+            document.querySelectorAll('.training-content').forEach(tc => {
+                tc.classList.remove('show');
+            });
+            document.querySelectorAll('.module-header').forEach(mh => {
+                mh.classList.remove('answered', 'answered-wrong');
+            });
+            document.querySelectorAll('.module').forEach(m => {
+                m.classList.remove('answered');
+            });
+            document.querySelectorAll('.module-status').forEach(ms => {
+                ms.textContent = '';
+            });
+            document.querySelectorAll('.module-content').forEach(mc => {
+                mc.classList.remove('active');
+            });
+            document.querySelectorAll('.module-arrow').forEach(ma => {
+                ma.classList.remove('open');
+            });
+
+            // 重置分数显示
+            document.getElementById('currentScore').textContent = '0';
+            document.getElementById('answeredCount').textContent = '0';
+            document.getElementById('progressFill').style.width = '0%';
+            ['safety', 'boundary', 'integrity', 'discipline'].forEach(cat => {
+                const tabScore = document.getElementById('tab-' + cat + '-score');
+                tabScore.textContent = '';
+                tabScore.classList.remove('complete');
+            });
+
+            // 回到第一个分类
+            document.querySelectorAll('.category-tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === 0);
+            });
+            document.querySelectorAll('.category-content').forEach((content, i) => {
+                content.classList.toggle('active', i === 0);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 隐藏重置功能：快速点击5次触发
+        document.getElementById('footerCredit').addEventListener('click', function() {
+            resetClickCount++;
+
+            if (resetClickTimer) clearTimeout(resetClickTimer);
+
+            resetClickTimer = setTimeout(() => {
+                resetClickCount = 0;
+            }, 2000);
+
+            if (resetClickCount >= 5) {
+                resetClickCount = 0;
+                resetQuiz();
+            }
+        });
+
+        // 回到顶部按钮
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
